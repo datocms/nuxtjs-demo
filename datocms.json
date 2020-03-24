@@ -1,0 +1,9 @@
+{
+  "name": "Nuxt.js blog",
+  "previewImage": "https://raw.githubusercontent.com/datocms/nuxtjs-demo/master/preview.png",
+  "templateId": "23796",
+  "deploymentType": "static",
+  "buildCommand": "npm run generate",
+  "buildDirectory": "dist",
+  "datocmsApiTokenEnvName": "NUXT_ENV_DATOCMS_API_TOKEN"
+}
