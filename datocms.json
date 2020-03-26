@@ -1,9 +1,11 @@
 {
-  "name": "Nuxt.js blog",
-  "previewImage": "https://raw.githubusercontent.com/datocms/nuxtjs-demo/master/preview.png",
-  "templateId": "23796",
+  "name": "Nuxt.js Travel Blog",
+  "description": "Simple demo travel blog built with Nuxt.js and Bulma CSS framework",
+  "previewImage": "https://www.datocms-assets.com/205/1585207650-screen-shot-2020-03-26-at-08-26-50-fullpage.png?crop=top&fit=crop&h=500&w=600&auto=format",
+  "datocmsProjectId": "23796",
   "deploymentType": "static",
   "buildCommand": "npm run generate",
   "buildDirectory": "dist",
-  "datocmsApiTokenEnvName": "NUXT_ENV_DATOCMS_API_TOKEN"
+  "datocmsApiTokenEnvName": "NUXT_ENV_DATOCMS_API_TOKEN",
+  "livePreviewUrl": "https://datocms-nuxtjs-demo.netlify.com"
 }
