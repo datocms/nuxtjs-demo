@@ -1,5 +1,5 @@
 export default {
-  ssr: false,
+  target: 'static',
   /*
    ** Headers of the page
    */
