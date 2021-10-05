@@ -1,5 +1,6 @@
 export default {
   target: 'static',
+  buildDir: 'dist',
   /*
    ** Headers of the page
    */
