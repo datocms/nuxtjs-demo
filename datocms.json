@@ -6,6 +6,7 @@
   "deploymentType": "static",
   "buildCommand": "npm run generate",
   "buildDirectory": "dist",
+  "netlifyBuildDirectory": "dist",
   "datocmsApiTokenEnvName": "NUXT_ENV_DATOCMS_API_TOKEN",
   "livePreviewUrl": "https://datocms-nuxtjs-demo.netlify.com"
 }
