@@ -1,4 +1,4 @@
-# Vue.js + DatoCMS + Bulma demo
+# Nuxt 3 + DatoCMS + Bulma demo
 
 ## Deploy on DatoCMS
 

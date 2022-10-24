@@ -69,7 +69,7 @@
 
     <!-- Articles -->
 
-    <section class="hero ">
+    <section class="hero">
       <div class="hero-body">
         <div class="container">
           <div
@@ -106,63 +106,62 @@
   </div>
 </template>
 
-<script>
-import { request, gql, imageFields, seoMetaTagsFields } from '~/lib/datocms'
-import { toHead } from 'vue-datocms'
-import format from 'date-fns/format'
-import parseISO from 'date-fns/parseISO'
+<script setup lang="ts">
 
-export default {
-  async asyncData({ params }) {
-    const data = await request({
-      query: gql`
-        {
-          site: _site {
-            favicon: faviconMetaTags {
-              ...seoMetaTagsFields
-            }
+import { imageFields, seoMetaTagsFields, formatDate } from '~/lib'
+
+import { toHead, Image as DatocmsImage, StructuredText as DatocmsStructuredText } from 'vue-datocms';
+
+const route = useRoute()
+
+const { data } = await useGraphqlQuery({
+  query: `
+    {
+      site: _site {
+        favicon: faviconMetaTags {
+          ...seoMetaTagsFields
+        }
+      }
+
+      posts: allPosts(first: 10, orderBy: _firstPublishedAt_DESC) {
+        id
+        title
+        slug
+        publicationDate: _firstPublishedAt
+        excerpt
+        coverImage {
+          responsiveImage(imgixParams: { fit: crop, ar: "16:9", w: 860 }) {
+            ...imageFields
           }
-
-          posts: allPosts(first: 10, orderBy: _firstPublishedAt_DESC) {
-            id
-            title
-            slug
-            publicationDate: _firstPublishedAt
-            excerpt
-            coverImage {
-              responsiveImage(imgixParams: { fit: crop, ar: "16:9", w: 860 }) {
-                ...imageFields
-              }
-            }
-            author {
-              name
-              picture {
-                responsiveImage(imgixParams: { fit: crop, ar: "1:1", w: 40 }) {
-                  ...imageFields
-                }
-              }
+        }
+        author {
+          name
+          picture {
+            responsiveImage(imgixParams: { fit: crop, ar: "1:1", w: 40 }) {
+              ...imageFields
             }
           }
         }
-
-        ${imageFields}
-        ${seoMetaTagsFields}
-      `
-    })
-
-    return { ready: !!data, ...data }
-  },
-  methods: {
-    formatDate(date) {
-      return format(parseISO(date), 'PPP')
-    }
-  },
-  head() {
-    if (!this.ready) {
-      return
+      }
     }
 
-    return toHead(this.site.favicon)
+    ${imageFields}
+    ${seoMetaTagsFields}
+  `,
+  key: route.fullPath,
+})
+
+const posts = computed(() => data.value.posts)
+
+const ready = computed(() => !!data.value)
+
+
+useHead(() => {
+  if (!data.value) {
+    return {}
   }
-}
+
+  return toHead(data.value.site.favicon)
+})
+
 </script>
