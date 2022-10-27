@@ -22,7 +22,7 @@
       </div>
     </nav>
 
-    <nuxt />
+    <slot />
 
     <footer class="footer">
       <div class="content has-text-centered">
@@ -38,19 +38,12 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      navbarOpen: false
-    }
-  },
-  methods: {
-    toggleNavbar() {
-      this.navbarOpen = !this.navbarOpen
-    }
-  }
-}
+<script setup lang="ts">
+
+const navbarOpen = ref<boolean>(false)
+
+const toggleNavbar = () => { navbarOpen.value = !navbarOpen.value }
+
 </script>
 
 <style>
