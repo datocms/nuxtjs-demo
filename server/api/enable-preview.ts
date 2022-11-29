@@ -12,8 +12,6 @@ export default eventHandler(async event => {
 
   const password = runtimeConfig.previewModePassword;
 
-  console.log('query.secret !== password', query.secret, password, query.secret !== password)
-
   // Check the secret and next parameters
   if (query.secret !== password) {
     sendError(event, createError({
