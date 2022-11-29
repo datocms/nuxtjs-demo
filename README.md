@@ -13,17 +13,15 @@ To keep the demo simple, content preview is available only for records that have
 
 ## Preview mode and deploy environment
 
-To take advantage of preview mode, deploy environment must support edge functions. That shouldn't be an issue: most of the provider have some form of edge function, these days. Make sure skim the list available ad [Nitro](https://nitro.unjs.io/deploy) — the server framework that Nuxt is based upon — for more info.
+To take advantage of preview mode, deploy environment must support edge functions. That shouldn't be an issue: most of the providers have some form of edge function, these days. For more info, make sure to skim the list available at [Nitro](https://nitro.unjs.io/deploy) — the server framework that Nuxt is based upon.
 
 ## Safety check before production
 
-If you use this demo as a starting point for a project the you plan to deploy to production, **take some time to understand how to properly configure secrets, so that no reserved information (like DatoCMS contents in draft status) gets leaked**.
+If you use this demo as a starting point for a project and you plan to deploy to production, **take some time to understand how to properly configure secrets, so that no reserved information (like, for example, DatoCMS contents in draft status) gets leaked**.
 
-Only one environment variable (`NUXT_ENV_DATOCMS_API_TOKEN`) is required to have the project working. You can set it via the `.env` file, like explained in [the next section](#local-development).
+Only one environment variable (`NUXT_ENV_DATOCMS_API_TOKEN`) is strictly required to have the project working. You can set it via the `.env` file, like explained in [the next section](#local-development). Though, before deploying to production, you should set following 4 environment variables:
 
-Before deploying to production, though, you should set 4 environment variables:
-
-* `NUXT_ENV_PREVIEW_MODE_PASSWORD`: the password that's requested before enabling preview mode;
+* `NUXT_ENV_PREVIEW_MODE_PASSWORD`: the password that users must have to enable preview mode;
 * `NUXT_ENV_DATOCMS_API_BUNDLE_SAFE_TOKEN`: a DatoCMS token with read-only permissions and no access to draft contents: this token can be included in the bundles produced by Nuxt at deploy;
 * `NUXT_ENV_DATOCMS_API_DRAFT_ENABLED_TOKEN`: a DatoCMS token with read-only permissions and **access to draft contents**: this token will be potentially accessible only to users who have access to the preview mode (thus, only to people that know the preview mode password and are therefore expected to see draft contents);
 * `NUXT_ENV_PREVIEW_MODE_ENCRYPTION_SECRET`: this secret is meant to sign the cookie that enables preview mode: it can be any random string.
