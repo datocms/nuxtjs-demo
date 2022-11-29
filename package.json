@@ -13,7 +13,9 @@
   "dependencies": {
     "bulma": "^0.9.4",
     "date-fns": "^2.29.3",
+    "jose": "^4.11.1",
     "sass": "^1.55.0",
-    "vue-datocms": "^3.0.3"
+    "vue": "^3.2.45",
+    "vue-datocms": "^4.0.0"
   }
 }

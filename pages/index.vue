@@ -108,9 +108,9 @@
 
 <script setup lang="ts">
 
-import { imageFields, seoMetaTagsFields, formatDate } from '~/lib'
-
 import { toHead, Image as DatocmsImage, StructuredText as DatocmsStructuredText } from 'vue-datocms';
+
+import { imageFields, seoMetaTagsFields, formatDate } from '~/lib'
 
 const route = useRoute()
 

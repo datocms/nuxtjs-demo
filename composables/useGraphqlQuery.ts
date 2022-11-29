@@ -1,39 +1,103 @@
+import { useQuerySubscription } from "vue-datocms";
+
+import { PREVIEW_MODE_COOKIE_NAME } from "~/utils/preview";
+
+const isClient = typeof window !== 'undefined'
+
+type EnabledPreview = {
+  enabled: true;
+  token: string;
+}
+
+type DisabledPreview = {
+  enabled: false;
+}
+
+type Preview =
+  | EnabledPreview
+  | DisabledPreview
+
+function isEnabledPreview (preview: Preview): preview is EnabledPreview {
+  return preview.enabled === true
+}
+
 export default async function useGraphqlQuery (
-  { query, key, variables = {}, preview = false }:
-  { query: any, key: string, variables?: Record<string, any>, preview?: boolean }
+  { query, key, variables = {} }:
+  { query: any, key: string, variables?: Record<string, any> }
 ) {
+  const jwt = useCookie(PREVIEW_MODE_COOKIE_NAME)
+
   const runtimeConfig = useRuntimeConfig()
 
-  let endpoint = runtimeConfig.public.datocms.endpoint
+  const endpoint = runtimeConfig.public.datocms.endpoint
+  const environment = runtimeConfig.public.datocms.environment
 
-  if (runtimeConfig.public.datocms.environment) {
-    endpoint += `/environments/${runtimeConfig.public.datocms.environment}`
+  const { data: initialData } = await fetchPublished({
+    endpoint,
+    token: runtimeConfig.public.datocms.bundleSafeToken,
+    query,
+    variables,
+    environment,
+  });
+
+  if (jwt.value) {
+    const preview = await $fetch<Preview>('/api/preview');
+
+    if (isClient && isEnabledPreview(preview)) {
+      return subscribeToDrafts({
+        query,
+        variables,
+        initialData: initialData.value,
+        token: preview.token,
+        environment,
+      })
+    }
   }
 
-  if (preview) {
-    endpoint += '/preview'
-  }
+  return { data: initialData }
+}
 
-  const data = ref<any>(null)
+async function fetchPublished(
+  { endpoint, token, query, variables, environment }:
+  { endpoint: string, token: string, query: any, variables: Record<string, any>, environment?: string }
+) {
+  const data = ref<any>(null);
 
-  const { data: fetchedData, pending, error, refresh } = await useFetch<{ data?: any; errors?: any }>(() => endpoint, {
+  const fullEndpoint = environment ? `${endpoint}/environments/${environment}` : endpoint
+
+  const fetchedData = await $fetch<{ data?: any; } | { errors?: any; }>(fullEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${runtimeConfig.public.datocms.token}`
+      Authorization: `Bearer ${token}`
     },
     body: {
       query,
       variables
     },
-    key
-  })
+  });
 
-  if (fetchedData.value.errors) {
-    throw JSON.stringify(fetchedData.value.errors)
+  if ('errors' in fetchedData) {
+    throw JSON.stringify(fetchedData.errors);
   }
 
-  data.value = fetchedData.value.data
+  if ('data' in fetchedData) {
+    data.value = fetchedData.data;
+  }
 
-  return { data, pending, error, refresh }
+  return { data };
+}
+
+async function subscribeToDrafts (
+  { query, variables = {}, token, initialData, environment }:
+  { query: any, variables?: Record<string, any>, token: string; initialData: any; environment?: string; }
+) {
+  return useQuerySubscription({
+    query,
+    variables,
+    token,
+    initialData,
+    includeDrafts: true,
+    environment,
+  })
 }
