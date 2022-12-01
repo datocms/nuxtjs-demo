@@ -19,13 +19,10 @@
                 </h2>
                 <h1 class="title">
                   <nuxt-link :to="`/posts/${post.slug}`">{{
-                    post.title
+                      post.title
                   }}</nuxt-link>
                 </h1>
-                <datocms-structured-text
-                  :data="post.content"
-                  :renderBlock="renderBlock"
-                />
+                <datocms-structured-text :data="post.content" :renderBlock="renderBlock" />
               </div>
             </div>
           </div>
@@ -39,13 +36,13 @@
 
 import { h } from "vue";
 
-import { imageFields, seoMetaTagsFields, formatDate } from '~/lib'
+import { imageFields, seoMetaTagsFields, formatDate } from '~~/utils/graphql'
 
 import { toHead, Image as DatocmsImage, StructuredText as DatocmsStructuredText } from 'vue-datocms';
 
 const route = useRoute()
 
-const { data, pending } = await useGraphqlQuery({
+const { data } = await useGraphqlQuery({
   query: `
     query BlogPostQuery($slug: String!) {
       site: _site {

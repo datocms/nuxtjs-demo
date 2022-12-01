@@ -18,4 +18,4 @@ export const seoMetaTagsFields = `
   }
 `;
 
-export const formatDate = (date) => format(parseISO(date), 'PPP')
+export const formatDate = (date: string) => format(parseISO(date), 'PPP')
