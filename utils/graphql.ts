@@ -2,14 +2,9 @@ import { format, parseISO } from "date-fns";
 
 export const imageFields = `
   fragment imageFields on ResponsiveImage {
-    aspectRatio
-    base64
-    height
-    sizes
     src
-    srcSet
-    webpSrcSet
     width
+    height
     alt
     title
   }
@@ -23,4 +18,4 @@ export const seoMetaTagsFields = `
   }
 `;
 
-export const formatDate = (date) => format(parseISO(date), 'PPP')
+export const formatDate = (date: string) => format(parseISO(date), 'PPP')
