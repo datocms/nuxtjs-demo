@@ -70,7 +70,7 @@ async function fetchPublished({
     fullEndpoint = `${fullEndpoint}/preview`
   }
 
-  const fetchedData = await $fetch<{ data?: any } | { errors?: any }>(
+  const fetchedData = await fetch(
     fullEndpoint,
     {
       method: 'POST',
@@ -78,12 +78,12 @@ async function fetchPublished({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: {
+      body: JSON.stringify({
         query,
         variables,
-      },
+      }),
     }
-  )
+  ).then((response) => response.json())
 
   if ('errors' in fetchedData) {
     throw JSON.stringify(fetchedData.errors)
