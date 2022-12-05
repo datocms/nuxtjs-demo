@@ -1,0 +1,24 @@
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "recommended": false
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "warn"
+      }
+    },
+    "ignore": ["src/vendor/**/*", "bower_components/**/*"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}

@@ -4,9 +4,23 @@
   "previewImage": "https://www.datocms-assets.com/205/1585207650-screen-shot-2020-03-26-at-08-26-50-fullpage.png?crop=top&fit=crop&h=500&w=600&auto=format",
   "datocmsProjectId": "23796",
   "deploymentType": "static",
-  "buildCommand": "npm run generate",
-  "buildDirectory": "dist",
-  "netlifyBuildDirectory": "dist",
-  "datocmsApiTokenEnvName": "NUXT_ENV_DATOCMS_API_TOKEN",
-  "livePreviewUrl": "https://datocms-nuxtjs-demo.netlify.com"
+  "environmentVariables": {
+    "NUXT_ENV_PREVIEW_MODE_ENCRYPTION_SECRET": {
+      "type": "string",
+      "value": "A random string to encrypt the preview mode cookie"
+    },
+    "NUXT_ENV_PREVIEW_MODE_PASSWORD": {
+      "type": "string",
+      "value": "42"
+    },
+    "NUXT_ENV_DATOCMS_API_BUNDLE_SAFE_TOKEN": {
+      "type": "datocmsAccessToken",
+      "tokenName": "Bundle-safe, read-only token"
+    },
+    "NUXT_ENV_DATOCMS_API_DRAFT_ENABLED_TOKEN": {
+      "type": "datocmsAccessToken",
+      "tokenName": "Draft-enabled, read-only token"
+    }
+  },
+  "livePreviewUrl": "https://nuxtjs-datocms-demo.vercel.app/"
 }

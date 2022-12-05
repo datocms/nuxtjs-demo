@@ -21,7 +21,7 @@
                     </h2>
                     <h1 class="title">
                       <nuxt-link :to="`/posts/${post.slug}`">{{
-                        post.title
+                          post.title
                       }}</nuxt-link>
                     </h1>
                     <div v-html="post.excerpt" />
@@ -47,11 +47,7 @@
                 <div class="column is-6 is-offset-3">
                   <div class="field has-addons has-addons-centered">
                     <div class="control is-expanded">
-                      <input
-                        class="input"
-                        type="text"
-                        placeholder="Email address"
-                      />
+                      <input class="input" type="text" placeholder="Email address" />
                     </div>
                     <div class="control">
                       <a class="button is-info">
@@ -72,24 +68,18 @@
     <section class="hero">
       <div class="hero-body">
         <div class="container">
-          <div
-            v-for="group in Math.ceil((posts.length - 2) / 2)"
-            v-bind:key="group"
-          >
+          <div v-for="group in Math.ceil((posts.length - 2) / 2)" v-bind:key="group">
             <section class="section">
               <div class="columns is-variable is-8">
-                <div
-                  v-for="(post, index) in posts.slice(group * 2, group * 2 + 2)"
-                  v-bind:key="post.slug"
-                  :class="['column is-5', index === 0 && 'is-offset-1']"
-                >
+                <div v-for="(post, index) in posts.slice(group * 2, group * 2 + 2)" v-bind:key="post.slug"
+                  :class="['column is-5', index === 0 && 'is-offset-1']">
                   <div class="content is-medium">
                     <h2 class="subtitle is-5 has-text-grey">
                       {{ formatDate(post.publicationDate) }}
                     </h2>
                     <h1 class="title has-text-black is-3">
                       <nuxt-link :to="`/posts/${post.slug}`">{{
-                        post.title
+                          post.title
                       }}</nuxt-link>
                     </h1>
                     <div class="has-text-dark" v-html="post.excerpt" />
@@ -108,9 +98,9 @@
 
 <script setup lang="ts">
 
-import { imageFields, seoMetaTagsFields, formatDate } from '~/lib'
-
 import { toHead, Image as DatocmsImage, StructuredText as DatocmsStructuredText } from 'vue-datocms';
+
+import { imageFields, seoMetaTagsFields, formatDate } from '~~/utils/graphql'
 
 const route = useRoute()
 
@@ -151,10 +141,9 @@ const { data } = await useGraphqlQuery({
   key: route.fullPath,
 })
 
-const posts = computed(() => data.value.posts)
+const posts = computed(() => data.value?.posts || [])
 
 const ready = computed(() => !!data.value)
-
 
 useHead(() => {
   if (!data.value) {

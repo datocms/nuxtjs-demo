@@ -1,39 +1,170 @@
-export default async function useGraphqlQuery (
-  { query, key, variables = {}, preview = false }:
-  { query: any, key: string, variables?: Record<string, any>, preview?: boolean }
-) {
+import { useQuerySubscription } from 'vue-datocms'
+
+import { Preview, PREVIEW_MODE_COOKIE_NAME } from '~/utils/preview'
+
+export default async function useGraphqlQuery({
+  query,
+  key,
+  variables = {},
+}: {
+  query: any
+  key: string
+  variables?: Record<string, any>
+}) {
   const runtimeConfig = useRuntimeConfig()
 
-  let endpoint = runtimeConfig.public.datocms.endpoint
+  const endpoint = runtimeConfig.public.datocms.endpoint
+  const environment = runtimeConfig.public.datocms.environment
+  const { preview, token } = await previewAndToken(runtimeConfig)
 
-  if (runtimeConfig.public.datocms.environment) {
-    endpoint += `/environments/${runtimeConfig.public.datocms.environment}`
+  if (!token) {
+    return { data: ref<any>(null) }
+  }
+
+  const { data: initialData } = await fetchPublished({
+    endpoint,
+    token,
+    preview,
+    query,
+    variables,
+    environment,
+  })
+
+  if (isClient && preview) {
+    return subscribeToDrafts({
+      query,
+      variables,
+      initialData: initialData.value,
+      token,
+      environment,
+    })
+  }
+
+  return { data: initialData }
+}
+
+async function fetchPublished({
+  endpoint,
+  token,
+  preview,
+  query,
+  variables,
+  environment,
+}: {
+  endpoint: string
+  token: string
+  preview: boolean
+  query: any
+  variables: Record<string, any>
+  environment?: string
+}) {
+  const data = ref<any>(null)
+
+  let fullEndpoint = endpoint
+
+  if (environment) {
+    fullEndpoint = `${fullEndpoint}/environments/${environment}`
   }
 
   if (preview) {
-    endpoint += '/preview'
+    fullEndpoint = `${fullEndpoint}/preview`
   }
 
-  const data = ref<any>(null)
+  const fetchedData = await fetch(
+    fullEndpoint,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+    }
+  ).then((response) => response.json())
 
-  const { data: fetchedData, pending, error, refresh } = await useFetch<{ data?: any; errors?: any }>(() => endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${runtimeConfig.public.datocms.token}`
-    },
-    body: {
-      query,
-      variables
-    },
-    key
+  if ('errors' in fetchedData) {
+    throw JSON.stringify(fetchedData.errors)
+  }
+
+  if ('data' in fetchedData) {
+    data.value = fetchedData.data
+  }
+
+  return { data }
+}
+
+async function subscribeToDrafts({
+  query,
+  variables = {},
+  token,
+  initialData,
+  environment,
+}: {
+  query: any
+  variables?: Record<string, any>
+  token: string
+  initialData: any
+  environment?: string
+}) {
+  return useQuerySubscription({
+    query,
+    variables,
+    token,
+    initialData,
+    includeDrafts: true,
+    environment,
   })
+}
 
-  if (fetchedData.value.errors) {
-    throw JSON.stringify(fetchedData.value.errors)
+async function previewAndToken(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+) {
+  const preview = isPreviewEnabled(runtimeConfig)
+  const token = await (preview
+    ? draftEnabledToken(runtimeConfig)
+    : bundleSafeToken(runtimeConfig))
+
+  return {
+    preview,
+    token,
+  }
+}
+
+function isPreviewEnabled(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+): boolean {
+  const cookie = useCookie(PREVIEW_MODE_COOKIE_NAME)
+
+  if (cookie.value) {
+    return true
   }
 
-  data.value = fetchedData.value.data
+  return false
+}
 
-  return { data, pending, error, refresh }
+async function draftEnabledToken(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+) {
+  if (isServer) {
+    return runtimeConfig.draftEnabledToken
+  }
+
+  if (isClient) {
+    const preview = await $fetch<Preview>('/api/preview')
+
+    if (isEnabledPreview(preview)) {
+      return preview.token
+    }
+  }
+
+  return undefined
+}
+
+async function bundleSafeToken(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+) {
+  return runtimeConfig.public.datocms.bundleSafeToken
 }
