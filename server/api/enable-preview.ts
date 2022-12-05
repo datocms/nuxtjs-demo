@@ -32,8 +32,6 @@ export default eventHandler(async (event) => {
 
   setCookie(event, PREVIEW_MODE_COOKIE_NAME, hash)
 
-  console.log('query.redirect', JSON.stringify(query.redirect))
-
   // Redirect to the homepage, or to the URL provided with the `redirect` query
   // string parameter:
   const redirectUrl = Array.isArray(query.redirect)
