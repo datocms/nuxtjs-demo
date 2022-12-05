@@ -8,10 +8,10 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.1.1",
-    "nuxt": "3.0.0"
+    "@types/crypto-js": "^4.1.1"
   },
   "dependencies": {
+    "nuxt": "3.0.0",
     "bulma": "^0.9.4",
     "crypto-js": "^4.1.1",
     "date-fns": "^2.29.3",
