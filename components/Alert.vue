@@ -26,7 +26,7 @@ const isPreview = computed(() => !!cookie.value)
 const enablePreview = () => {
   const password = prompt("Enter the password to enable preview mode, please:", "Only for the purpose of the demo, password is \"42\"");
 
-  if(password !== null) {
+  if (password !== null) {
     window.location.href = `/api/enable-preview?secret=${password}`
   }
 }

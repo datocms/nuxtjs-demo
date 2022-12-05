@@ -1,26 +1,22 @@
-import { jwtVerify } from "jose"
+import { previewModeEncryptionSecretHash, PREVIEW_MODE_COOKIE_NAME } from '~/utils/preview'
 
-import { PREVIEW_MODE_COOKIE_NAME } from "~/utils/preview";
-
-export default eventHandler(async event => {
+export default eventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig()
 
-  const jwt = getCookie(event, PREVIEW_MODE_COOKIE_NAME)
+  const cookie = getCookie(event, PREVIEW_MODE_COOKIE_NAME)
 
-  if (!jwt) {
+  if (!cookie) {
     return { enabled: false }
   }
 
-  const secret = new TextEncoder().encode(runtimeConfig.previewModeEncryptionSecret)
+  const hash = previewModeEncryptionSecretHash(runtimeConfig.previewModeEncryptionSecret)
 
-  try {
-    await jwtVerify(jwt, secret, {})
-
+  if (cookie === hash) {
     return {
       enabled: true,
       token: runtimeConfig.draftEnabledToken,
     }
-  } catch (error) {
-    return { enabled: false }
   }
+
+  return { enabled: false }
 })

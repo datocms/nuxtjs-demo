@@ -1,8 +1,6 @@
-import { SignJWT } from "jose"
+import { PREVIEW_MODE_COOKIE_NAME } from '~/utils/preview'
 
-import { PREVIEW_MODE_COOKIE_NAME } from "~/utils/preview";
-
-export default eventHandler(async event => {
+export default eventHandler(async (event) => {
   deleteCookie(event, PREVIEW_MODE_COOKIE_NAME)
 
   const redirectUrl = '/'

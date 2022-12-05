@@ -141,7 +141,7 @@ const { data } = await useGraphqlQuery({
   key: route.fullPath,
 })
 
-const posts = computed(() => data.value.posts)
+const posts = computed(() => data.value?.posts || [])
 
 const ready = computed(() => !!data.value)
 

@@ -1,97 +1,114 @@
-import { useQuerySubscription } from "vue-datocms";
+import { useQuerySubscription } from 'vue-datocms'
 
-import { PREVIEW_MODE_COOKIE_NAME } from "~/utils/preview";
+import { Preview, PREVIEW_MODE_COOKIE_NAME } from '~/utils/preview'
 
-const isClient = typeof window !== 'undefined'
-
-type EnabledPreview = {
-  enabled: true;
-  token: string;
-}
-
-type DisabledPreview = {
-  enabled: false;
-}
-
-type Preview =
-  | EnabledPreview
-  | DisabledPreview
-
-function isEnabledPreview (preview: Preview): preview is EnabledPreview {
-  return preview.enabled === true
-}
-
-export default async function useGraphqlQuery (
-  { query, key, variables = {} }:
-  { query: any, key: string, variables?: Record<string, any> }
-) {
-  const jwt = useCookie(PREVIEW_MODE_COOKIE_NAME)
-
+export default async function useGraphqlQuery({
+  query,
+  key,
+  variables = {},
+}: {
+  query: any
+  key: string
+  variables?: Record<string, any>
+}) {
   const runtimeConfig = useRuntimeConfig()
 
   const endpoint = runtimeConfig.public.datocms.endpoint
   const environment = runtimeConfig.public.datocms.environment
+  const { preview, token } = await previewAndToken(runtimeConfig)
+
+  if (!token) {
+    return { data: ref<any>(null) }
+  }
 
   const { data: initialData } = await fetchPublished({
     endpoint,
-    token: runtimeConfig.public.datocms.bundleSafeToken,
+    token,
+    preview,
     query,
     variables,
     environment,
-  });
+  })
 
-  if (jwt.value) {
-    const preview = await $fetch<Preview>('/api/preview');
-
-    if (isClient && isEnabledPreview(preview)) {
-      return subscribeToDrafts({
-        query,
-        variables,
-        initialData: initialData.value,
-        token: preview.token,
-        environment,
-      })
-    }
+  if (isClient && preview) {
+    return subscribeToDrafts({
+      query,
+      variables,
+      initialData: initialData.value,
+      token,
+      environment,
+    })
   }
 
   return { data: initialData }
 }
 
-async function fetchPublished(
-  { endpoint, token, query, variables, environment }:
-  { endpoint: string, token: string, query: any, variables: Record<string, any>, environment?: string }
-) {
-  const data = ref<any>(null);
+async function fetchPublished({
+  endpoint,
+  token,
+  preview,
+  query,
+  variables,
+  environment,
+}: {
+  endpoint: string
+  token: string
+  preview: boolean
+  query: any
+  variables: Record<string, any>
+  environment?: string
+}) {
+  const data = ref<any>(null)
 
-  const fullEndpoint = environment ? `${endpoint}/environments/${environment}` : endpoint
+  let fullEndpoint = endpoint
 
-  const fetchedData = await $fetch<{ data?: any; } | { errors?: any; }>(fullEndpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: {
-      query,
-      variables
-    },
-  });
+  if (environment) {
+    fullEndpoint = `${fullEndpoint}/environments/${environment}`
+  }
+
+  if (preview) {
+    fullEndpoint = `${fullEndpoint}/preview`
+  }
+
+  const fetchedData = await $fetch<{ data?: any } | { errors?: any }>(
+    fullEndpoint,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: {
+        query,
+        variables,
+      },
+    }
+  )
 
   if ('errors' in fetchedData) {
-    throw JSON.stringify(fetchedData.errors);
+    throw JSON.stringify(fetchedData.errors)
   }
 
   if ('data' in fetchedData) {
-    data.value = fetchedData.data;
+    data.value = fetchedData.data
   }
 
-  return { data };
+  return { data }
 }
 
-async function subscribeToDrafts (
-  { query, variables = {}, token, initialData, environment }:
-  { query: any, variables?: Record<string, any>, token: string; initialData: any; environment?: string; }
-) {
+async function subscribeToDrafts({
+  query,
+  variables = {},
+  token,
+  initialData,
+  environment,
+}: {
+  query: any
+  variables?: Record<string, any>
+  token: string
+  initialData: any
+  environment?: string
+}) {
   return useQuerySubscription({
     query,
     variables,
@@ -100,4 +117,54 @@ async function subscribeToDrafts (
     includeDrafts: true,
     environment,
   })
+}
+
+async function previewAndToken(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+) {
+  const preview = isPreviewEnabled(runtimeConfig)
+  const token = await (preview
+    ? draftEnabledToken(runtimeConfig)
+    : bundleSafeToken(runtimeConfig))
+
+  return {
+    preview,
+    token,
+  }
+}
+
+function isPreviewEnabled(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+): boolean {
+  const cookie = useCookie(PREVIEW_MODE_COOKIE_NAME)
+
+  if (cookie.value) {
+    return true
+  }
+
+  return false
+}
+
+async function draftEnabledToken(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+) {
+  if (isServer) {
+    return runtimeConfig.draftEnabledToken
+  }
+
+  if (isClient) {
+    const preview = await $fetch<Preview>('/api/preview')
+
+    if (isEnabledPreview(preview)) {
+      return preview.token
+    }
+  }
+
+  return undefined
+}
+
+async function bundleSafeToken(
+  runtimeConfig: ReturnType<typeof useRuntimeConfig>
+) {
+  return runtimeConfig.public.datocms.bundleSafeToken
 }

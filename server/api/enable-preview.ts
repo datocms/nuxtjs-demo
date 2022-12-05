@@ -1,8 +1,9 @@
-import { SignJWT } from "jose"
+import {
+  previewModeEncryptionSecretHash,
+  PREVIEW_MODE_COOKIE_NAME,
+} from '~/utils/preview'
 
-import { PREVIEW_MODE_COOKIE_NAME } from "~/utils/preview";
-
-export default eventHandler(async event => {
+export default eventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig()
   const query = getQuery(event)
 
@@ -10,34 +11,38 @@ export default eventHandler(async event => {
   // on Vercel/Netlify, or everyone will be able to enter Preview Mode and
   // see draft content!
 
-  const password = runtimeConfig.previewModePassword;
+  const password = runtimeConfig.previewModePassword
 
   // Check the secret and next parameters
   if (query.secret !== password) {
-    sendError(event, createError({
-      statusCode: 401,
-      message: 'Missing or invalid `secret` query string parameter!'
-    }))
+    sendError(
+      event,
+      createError({
+        statusCode: 401,
+        message: 'Missing or invalid `secret` query string parameter!',
+      })
+    )
 
     return
   }
 
-  const secret = new TextEncoder().encode(runtimeConfig.previewModeEncryptionSecret)
-  const alg = 'HS256'
+  const hash = previewModeEncryptionSecretHash(
+    runtimeConfig.previewModeEncryptionSecret
+  )
 
-  const jwt = await new SignJWT({})
-    .setProtectedHeader({ alg })
-    .setIssuedAt()
-    .sign(secret)
+  setCookie(event, PREVIEW_MODE_COOKIE_NAME, hash)
 
-  setCookie(event, PREVIEW_MODE_COOKIE_NAME, jwt)
+  console.log('query.redirect', JSON.stringify(query.redirect))
 
   // Redirect to the homepage, or to the URL provided with the `redirect` query
   // string parameter:
-  const redirectUrl = (query.redirect || ['/'])[0]
+  const redirectUrl = Array.isArray(query.redirect)
+    ? query.redirect[0] // Redirect can be an array: in that case, I took the first element
+    : typeof query.redirect === 'string' // Or else...
+    ? query.redirect // ... if it's a string, I use it as it is.
+    : '/' // Default is on the root.
 
   sendRedirect(event, redirectUrl)
 
   event.node.res.end()
 })
-
