@@ -16,7 +16,7 @@
               <div class="columns">
                 <div class="column is-8 is-offset-2">
                   <div class="content is-medium">
-                    <h2 class="subtitle is-4">
+                    <h2 v-if="post.publicationDate" class="subtitle is-4">
                       {{ formatDate(post.publicationDate) }}
                     </h2>
                     <h1 class="title">
@@ -74,7 +74,7 @@
                 <div v-for="(post, index) in posts.slice(group * 2, group * 2 + 2)" v-bind:key="post.slug"
                   :class="['column is-5', index === 0 && 'is-offset-1']">
                   <div class="content is-medium">
-                    <h2 class="subtitle is-5 has-text-grey">
+                    <h2 v-if="post.publicationDate" class="subtitle is-5 has-text-grey">
                       {{ formatDate(post.publicationDate) }}
                     </h2>
                     <h1 class="title has-text-black is-3">
