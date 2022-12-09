@@ -138,19 +138,10 @@ const { data } = await useGraphqlQuery({
     ${imageFields}
     ${seoMetaTagsFields}
   `,
-  key: route.fullPath,
 })
 
 const posts = computed(() => data.value?.posts || [])
 
-const ready = computed(() => !!data.value)
-
-useHead(() => {
-  if (!data.value) {
-    return {}
-  }
-
-  return toHead(data.value.site.favicon)
-})
+useHead(() => toHead(data.value?.site?.favicon || {}))
 
 </script>

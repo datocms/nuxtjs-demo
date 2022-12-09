@@ -4,11 +4,9 @@ import { Preview, PREVIEW_MODE_COOKIE_NAME } from '~/utils/preview'
 
 export default async function useGraphqlQuery({
   query,
-  key,
   variables = {},
 }: {
   query: any
-  key: string
   variables?: Record<string, any>
 }) {
   const runtimeConfig = useRuntimeConfig()

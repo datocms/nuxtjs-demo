@@ -97,21 +97,16 @@ const { data } = await useGraphqlQuery({
   variables: {
     slug: route.params.id,
   },
-  key: route.fullPath,
 })
 
-const post = computed(() => data.value.post)
-const site = computed(() => data.value.site)
+if (!data.value?.post) {
+  throw createError({ statusCode: 404, statusMessage: 'Page Not Found' })
+}
 
-const ready = computed(() => !!data.value)
+const post = computed(() => data.value?.post)
+const site = computed(() => data.value?.site)
 
-useHead(() => {
-  if (!post.value) {
-    return {}
-  }
-
-  return toHead(post.value.seo, site.value.favicon)
-})
+useHead(() => toHead(post.value?.seo || {}, site.value?.favicon || {}))
 
 const renderBlock = ({ record }) => {
   if (record.__typename === 'ImageBlockRecord') {
