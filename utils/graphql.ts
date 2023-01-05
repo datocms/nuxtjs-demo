@@ -2,6 +2,7 @@ import { format, parseISO } from "date-fns";
 
 export const imageFields = `
   fragment imageFields on ResponsiveImage {
+    base64
     src
     width
     height
