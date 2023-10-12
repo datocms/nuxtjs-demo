@@ -1,4 +1,11 @@
 {
+	"$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "files": {
+    "ignore": [".nuxt/*"]
+  },
+	"organizeImports": {
+		"enabled": true
+	},
   "linter": {
     "enabled": true,
     "rules": {
@@ -8,6 +15,9 @@
       },
       "security": {
         "noDangerouslySetInnerHtml": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
       }
     },
     "ignore": ["src/vendor/**/*", "bower_components/**/*"]

@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import { format, parseISO } from 'date-fns';
 
 export const imageFields = `
   fragment imageFields on ResponsiveImage {
@@ -19,4 +19,4 @@ export const seoMetaTagsFields = `
   }
 `;
 
-export const formatDate = (date: string) => format(parseISO(date), 'PPP')
+export const formatDate = (date: string) => format(parseISO(date), 'PPP');
