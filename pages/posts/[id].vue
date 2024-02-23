@@ -114,7 +114,7 @@ const renderBlock = ({ record }) => {
       'div',
       { class: "mb-5" },
       [
-        h("datocms-image", { props: { data: record.image.responsiveImage } }),
+        h(DatocmsImage, {  data: record.image.responsiveImage }),
       ]
     );
   }
